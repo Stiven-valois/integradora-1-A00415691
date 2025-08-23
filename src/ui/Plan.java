@@ -14,6 +14,7 @@ public class Plan {
     LocalDate[] activityDates = new LocalDate[5];
     double[] activityPercentages = new double[5];
     int activityCount = 0;
+    double[] activityGrades = new double[5];
     Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -22,8 +23,10 @@ public class Plan {
     }
 
     public void init() {
-        registerCourse(); 
+        registerCourse();
         registerActivities();
+        loadGrades();
+        displayActivities();
     }
 
     public void registerCourse() {
@@ -34,7 +37,7 @@ public class Plan {
         courseName = scanner.nextLine();
         System.out.print("Ingrese el número de créditos: ");
         credits = scanner.nextInt();
-        scanner.nextLine(); 
+        scanner.nextLine();
         System.out.print("Ingrese el nombre del profesor: ");
         teacherName = scanner.nextLine();
         System.out.print("Ingrese el salón: ");
@@ -46,56 +49,55 @@ public class Plan {
         System.out.println("\nPuedes ingresar hasta 5 actividades para este curso");
         System.out.print("¿Cuántas actividades desea registrar? (máximo 5): ");
         int numActivities = validateActivityCount();
-        
+
         double totalPercentage = collectActivitiesData(numActivities);
         validateTotalPercentage(totalPercentage);
     }
-    
+
     public double collectActivitiesData(int numActivities) {
-        double totalPercentage = 0; 
-        int i = 0; 
-        
+        double totalPercentage = 0;
+        int i = 0;
+
         while (i < numActivities) {
             System.out.println("\nActividad " + (i + 1));
             double percentage = registerActivity(i);
-            
+
             if (totalPercentage + percentage > 100) {
                 System.out.println("Error: El porcentaje excede el 100%. Intente de nuevo.");
-                continue; 
+                continue;
             }
-            
+
             activityPercentages[i] = percentage;
             totalPercentage += percentage;
             activityCount++;
-            i++; 
+            i++;
             System.out.println("Actividad registrada. Porcentaje acumulado: " + totalPercentage + "%");
         }
-        
+
         return totalPercentage;
     }
-    
-    
+
     public double registerActivity(int index) {
         System.out.print("Nombre de la actividad: ");
         activityNames[index] = scanner.nextLine();
-        
-        System.out.print("Fecha de entrega (yyyy-MM-dd): ");
+
+        System.out.print("Fecha de entrega (dd/MM/yyyy): ");
         activityDates[index] = validateDate();
-        
+
         System.out.print("Porcentaje de la actividad: ");
         return validatePercentage();
     }
-    
+
     public void validateTotalPercentage(double totalPercentage) {
         if (totalPercentage != 100.0) {
             System.out.println("\nEl porcentaje total es " + totalPercentage + "% y debe ser exactamente 100%");
             System.out.println("Las actividades no han sido guardadas.");
-            activityCount = 0; 
+            activityCount = 0;
         } else {
             System.out.println("\nActividades registradas exitosamente!");
         }
     }
-    
+
     public int validateActivityCount() {
         while (true) {
             try {
@@ -110,16 +112,16 @@ public class Plan {
             }
         }
     }
-    
+
     public LocalDate validateDate() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
         while (true) {
             try {
                 String dateInput = scanner.nextLine();
                 return LocalDate.parse(dateInput, formatter);
             } catch (DateTimeParseException e) {
-                System.out.print("Formato de fecha inválido. Use yyyy-MM-dd: ");
+                System.out.print("Formato de fecha inválido. Use dd/MM/yyyy: ");
             }
         }
     }
@@ -138,4 +140,60 @@ public class Plan {
             }
         }
     }
+        
+
+    public void loadGrades() {
+        if (activityCount == 0) {
+            System.out.println("No hay actividades registradas para cargar notas.");
+            return;
+        }
+        System.out.println("\nIngrese las notas para las " + activityCount + " actividades:");
+
+        for (int i = 0; i < activityCount; i++) {
+            System.out.print("Nota para '" + activityNames[i] + "' (0.0 - 5.0): ");
+            activityGrades[i] = validateGrade();
+            System.out.println("Nota registrada: " + activityGrades[i]);
+        }
+
+        System.out.println("\nTodas las notas han sido cargadas exitosamente!");
+    }
+
+    public double validateGrade() {
+        while (true) {
+            try {
+                double grade = Double.parseDouble(scanner.nextLine());
+                if (grade >= 0.0 && grade <= 5.0) {
+                    return grade;
+                } else {
+                    System.out.print("La nota debe estar entre 0.0 y 5.0: ");
+                }
+            } catch (NumberFormatException e) {
+                System.out.print("Ingrese un número válido: ");
+            }
+        }
+    }
+public void displayActivities() {
+        if (activityCount == 0) {
+            System.out.println("No hay actividades registradas para mostrar.");
+            return;
+        }
+
+        System.out.println("\nCurso: " + courseName + " (" + course + ")" + " Dictado por: " + teacherName);
+        System.out.println("\nLista de actividades:");
+
+        for (int i = 0; i < activityCount; i++) {
+            displayActivity(i);
+        }
+    }
+
+    public void displayActivity(int index) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String formattedDate = activityDates[index].format(formatter);
+        
+        System.out.println("\n" + (index + 1) + ". " + activityNames[index]);
+        System.out.println("   Fecha de entrega: " + formattedDate);
+        System.out.println("Nota: " + activityGrades[index]);
+        System.out.println("   Porcentaje: " + activityPercentages[index] + "%");
+    }
+
 }
