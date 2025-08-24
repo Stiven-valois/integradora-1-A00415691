@@ -19,7 +19,7 @@ public class Plan {
 
     public static void main(String[] args) {
         Plan run = new Plan();
-        run.init();
+        run.showMenu();
     }
 
     public void init() {
@@ -27,10 +27,59 @@ public class Plan {
         registerActivities();
         loadGrades();
         displayActivities();
+        calculateCourseAverage();
+        scanner.close();
     }
 
-    public void registerCourse() {
+    public void displayMenuOptions() {
+    System.out.println("\n=== MENÚ PRINCIPAL ===");
+    System.out.println("1. Registrar curso");
+    System.out.println("2. Registrar actividades");
+    System.out.println("3. Cargar notas");
+    System.out.println("4. Mostrar actividades");
+    System.out.println("5. Calcular promedio del curso");
+    System.out.println("6. Salir");
+    System.out.print("Seleccione una opción: ");
+}
+public void showMenu() {
+    int option;
 
+    do {
+        displayMenuOptions();
+        option = validateMenuOption();
+
+        switch (option) {
+            case 1 -> registerCourse();
+            case 2 -> registerActivities();
+            case 3 -> loadGrades();
+            case 4 -> displayActivities();
+            case 5 -> calculateCourseAverage();
+            case 6 -> System.out.println("Gracias por usar el sistema. ¡Hasta pronto!");
+            default -> System.out.println("Opción inválida. Intente de nuevo.");
+        }
+    } while (option != 6);
+}
+    
+    public void displayGoodbye() {
+        System.out.println("\n¡Gracias por usar PLANEO!");
+        System.out.println("¡Hasta luego!");
+    }
+    public int validateMenuOption() {
+    while (true) {
+        try {
+            int option = Integer.parseInt(scanner.nextLine());
+            if (option >= 1 && option <= 6) {
+                return option;
+            } else {
+                System.out.print("Ingrese un número entre 1 y 6: ");
+            }
+        } catch (NumberFormatException e) {
+            System.out.print("Entrada inválida. Ingrese un número: ");
+        }
+    }
+}
+
+    public void registerCourse() {
         System.out.print("Ingrese el código del curso: ");
         course = scanner.nextLine();
         System.out.print("Ingrese el nombre del curso: ");
@@ -46,10 +95,8 @@ public class Plan {
     }
 
     public void registerActivities() {
-        System.out.println("\nPuedes ingresar hasta 5 actividades para este curso");
-        System.out.print("¿Cuántas actividades desea registrar? (máximo 5): ");
+        System.out.println("\nPuedes registrar maximo 5 actividades para este curso");
         int numActivities = validateActivityCount();
-
         double totalPercentage = collectActivitiesData(numActivities);
         validateTotalPercentage(totalPercentage);
     }
@@ -57,7 +104,6 @@ public class Plan {
     public double collectActivitiesData(int numActivities) {
         double totalPercentage = 0;
         int i = 0;
-
         while (i < numActivities) {
             System.out.println("\nActividad " + (i + 1));
             double percentage = registerActivity(i);
@@ -66,24 +112,20 @@ public class Plan {
                 System.out.println("Error: El porcentaje excede el 100%. Intente de nuevo.");
                 continue;
             }
-
             activityPercentages[i] = percentage;
             totalPercentage += percentage;
             activityCount++;
             i++;
-            System.out.println("Actividad registrada. Porcentaje acumulado: " + totalPercentage + "%");
+            System.out.println("Porcentaje acumulado: " + totalPercentage + "%");
         }
-
         return totalPercentage;
     }
 
     public double registerActivity(int index) {
         System.out.print("Nombre de la actividad: ");
         activityNames[index] = scanner.nextLine();
-
         System.out.print("Fecha de entrega (dd/MM/yyyy): ");
         activityDates[index] = validateDate();
-
         System.out.print("Porcentaje de la actividad: ");
         return validatePercentage();
     }
@@ -94,7 +136,6 @@ public class Plan {
             System.out.println("Las actividades no han sido guardadas.");
             activityCount = 0;
         } else {
-            System.out.println("\nActividades registradas exitosamente!");
         }
     }
 
@@ -115,7 +156,6 @@ public class Plan {
 
     public LocalDate validateDate() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
         while (true) {
             try {
                 String dateInput = scanner.nextLine();
@@ -141,7 +181,6 @@ public class Plan {
         }
     }
         
-
     public void loadGrades() {
         if (activityCount == 0) {
             System.out.println("No hay actividades registradas para cargar notas.");
@@ -150,12 +189,10 @@ public class Plan {
         System.out.println("\nIngrese las notas para las " + activityCount + " actividades:");
 
         for (int i = 0; i < activityCount; i++) {
-            System.out.print("Nota para '" + activityNames[i] + "' (0.0 - 5.0): ");
+            System.out.print("\nNota para '" + activityNames[i] + "' (0.0 - 5.0): ");
             activityGrades[i] = validateGrade();
             System.out.println("Nota registrada: " + activityGrades[i]);
         }
-
-        System.out.println("\nTodas las notas han sido cargadas exitosamente!");
     }
 
     public double validateGrade() {
@@ -179,7 +216,7 @@ public void displayActivities() {
         }
 
         System.out.println("\nCurso: " + courseName + " (" + course + ")" + " Dictado por: " + teacherName);
-        System.out.println("\nLista de actividades:");
+        System.out.println("Lista de actividades:");
 
         for (int i = 0; i < activityCount; i++) {
             displayActivity(i);
@@ -189,11 +226,57 @@ public void displayActivities() {
     public void displayActivity(int index) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String formattedDate = activityDates[index].format(formatter);
-        
         System.out.println("\n" + (index + 1) + ". " + activityNames[index]);
         System.out.println("   Fecha de entrega: " + formattedDate);
-        System.out.println("Nota: " + activityGrades[index]);
+        System.out.println("   Nota: " + activityGrades[index]);
         System.out.println("   Porcentaje: " + activityPercentages[index] + "%");
+    }
+
+    public void calculateCourseAverage() {
+        if (activityCount == 0) {
+            System.out.println("No hay actividades registradas para calcular promedio.");
+            return;
+        }
+    
+        System.out.println("\n=== PROMEDIO DEL CURSO ===");
+        System.out.println("Curso: " + courseName + " (" + course + ")");
+        System.out.println("Profesor: " + teacherName);
+        System.out.println("\nDetalle de actividades:");
+        displayActivitiesForAverage();
+        double average = computeWeightedAverage();
+        displayFinalResult(average);
+    }
+    
+    public void displayActivitiesForAverage() {
+        System.out.println("Actividad               | Peso    | Nota | Contribución");
+        for (int i = 0; i < activityCount; i++) {
+            double contribution = activityGrades[i] * (activityPercentages[i] / 100);
+            System.out.printf("%-23s | %6.1f%% | %4.1f | %8.2f%n", 
+                activityNames[i], 
+                activityPercentages[i], 
+                activityGrades[i],
+                contribution);
+        }
+    }
+    
+    public double computeWeightedAverage() {
+        double weightedSum = 0;
+        for (int i = 0; i < activityCount; i++) {
+            double contribution = activityGrades[i] * (activityPercentages[i] / 100);
+            weightedSum += contribution;
+        }
+        return weightedSum;
+    }
+    
+    public void displayFinalResult(double average) {
+        System.out.println("------------------------|---------|------|-------------");
+        System.out.printf("PROMEDIO PONDERADO:                        %8.2f%n", average);
+        System.out.println("\n" + "=".repeat(50));
+        if (average >= 3.0) {
+            System.out.println("ESTADO DEL CURSO: APROBADO");
+        } else {
+            System.out.println("ESTADO DEL CURSO: REPROBADO");
+        }
     }
 
 }
